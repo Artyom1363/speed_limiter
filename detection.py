@@ -11,12 +11,10 @@ import socket
 import subprocess
 
 
-
 uart_send_proc = subprocess.Popen(['./uart_send'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, bufsize=1)
 lcd_send_proc = subprocess.Popen(['./lcd'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, bufsize=1)
 
-# Define VideoStream class to handle streaming of video from webcam in separate processing thread
-# Source - Adrian Rosebrock, PyImageSearch: https://www.pyimagesearch.com/2015/12/28/increasing-raspberry-pi-fps-with-python-and-opencv/
+
 class VideoStream:
     """Camera object that controls video streaming from the Picamera"""
     def __init__(self, resolution=(640, 480), framerate=30):
@@ -88,13 +86,7 @@ if pkg:
 else:
     from tensorflow.lite.python.interpreter import Interpreter
     if use_TPU:
-        from tensorflow.lite.python.interpreter import load_delegate
-
-# If using Edge TPU, assign filename for Edge TPU model
-if use_TPU:
-    # If user has specified the name of the .tflite file, use that name, otherwise use default 'edgetpu.tflite'
-    if (GRAPH_NAME == 'detect.tflite'):
-        GRAPH_NAME = 'edgetpu.tflite'       
+        from tensorflow.lite.python.interpreter import load_delegate     
 
 CWD_PATH = os.getcwd()
 
@@ -130,8 +122,6 @@ floating_model = (input_details[0]['dtype'] == np.float32)
 input_mean = 127.5
 input_std = 127.5
 
-# Check output layer name to determine if this model was created with TF2 or TF1,
-# because outputs are ordered differently for TF2 and TF1 models
 outname = output_details[0]['name']
 
 if ('StatefulPartitionedCall' in outname): # This is a TF2 model
@@ -147,11 +137,6 @@ freq = cv2.getTickFrequency()
 videostream = VideoStream(resolution=(imW,imH),framerate=30).start()
 time.sleep(1)
 
-#for frame1 in camera.capture_continuous(rawCapture, format="bgr",use_video_port=True):
-# host = '192.168.2.145'
-# port = 65000
-# with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-#     s.connect((host, port))
 
 print("width: ", width, " height: ", height)
 while True:
@@ -207,20 +192,14 @@ while True:
     # Draw framerate in corner of frame
     cv2.putText(frame,'FPS: {0:.2f}'.format(frame_rate_calc),(30,50),cv2.FONT_HERSHEY_SIMPLEX,1,(255,255,0),2,cv2.LINE_AA)
 
-    # All the results have been drawn on the frame, so it's time to display it.
     cv2.imshow('Object detector', frame)
 
-    # Calculate framerate
     t2 = cv2.getTickCount()
     time1 = (t2-t1)/freq
     frame_rate_calc= 1/time1
 
-    # Press 'q' to quit
     if cv2.waitKey(1) == ord('q'):
         break
-    # max_speed = 25
-    # if len(persons) > 0:
-    #     max_speed = 15
 
     center_persons = 0
     left_persons = 0
@@ -229,12 +208,10 @@ while True:
     frame_center = imW / 2
 
     for person in persons:
-        # print("person xs: ", person[0], person[1])
+        
         max_len = max(max_len, person[1] - person[0])
         person_center = (person[0] + person[1]) / 2
         
-        # print('person_center:', person_center)
-        # print('frame_center:', frame_center)
 
         if abs(person_center - frame_center) < 100:
             center_persons += 1
@@ -243,16 +220,13 @@ while True:
         else:
             right_persons += 1
 
-    print("max_len", max_len)
     max_speed = int(max(0, 25 - 25 * (max_len / frame_center)))
-    print(max_speed)
 
     uart_send_proc.stdin.write(f"{max_speed}\n")
-    uart_send_proc.stdin.flush()  # Убедитесь, что данные отправлены
+    uart_send_proc.stdin.flush() 
     lcd_send_proc.stdin.write(f"{left_persons} {center_persons} {right_persons}\n")
     lcd_send_proc.stdin.flush()
-    # output = f"Max speed {max_speed}\n"
-    # s.sendall(output.encode('utf-8'))
+
     
 uart_send_proc.stdin.close()
 uart_send_proc.terminate()

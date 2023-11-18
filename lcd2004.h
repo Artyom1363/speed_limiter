@@ -13,4 +13,4 @@ int lcd2004Clear(void);
 
 void lcd2004Shutdown(void);
 
-#endif // LCD2004_H
+#endif
