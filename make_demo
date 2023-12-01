@@ -1,0 +1,13 @@
+CFLAGS=-c -Wall -O2
+LIBS = -lm -llcd2004 -lpthread
+
+all: demo
+
+demo: main.o
+	$(CC) main.o $(LIBS) -o lcd 
+
+main.o: main.c
+	$(CC) $(CFLAGS) main.c
+
+clean:
+	rm *.o lcd
