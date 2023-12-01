@@ -11,7 +11,7 @@ import socket
 import subprocess
 
 
-uart_send_proc = subprocess.Popen(['./uart_send'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, bufsize=1)
+uart_send_proc = subprocess.Popen(['sudo', './uart_send'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, bufsize=1)
 lcd_send_proc = subprocess.Popen(['./lcd'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, bufsize=1)
 
 
