@@ -94,8 +94,6 @@ void uart_init() {
 	// запись 0, чтобы настройки применились
 	GPPUDCLK0 =  0x00000000;
 
-	/*--------GPIO Initialization over---------------*/
-
 	// обнуление регистра управления
 	UART_CR = 0x00000000;
 
@@ -104,11 +102,6 @@ void uart_init() {
 
 	// очистка ожидающих прерываний
 	UART_ICR =  0x7FF;
-
-	// Set integer & fractional part o baud rate.
-	// Divider = UART_CLOCK/(16 * Baud)
-	// Fraction part register = (Fractional part * 64) + 0.5
-	// UART_CLOCK = 3000000; Baud = 115200.
 	
 	
     // Установка целой части делителя для определения скорости передачи данных
